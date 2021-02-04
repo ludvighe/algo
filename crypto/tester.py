@@ -2,9 +2,16 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import json
+import time
 
 import shrimpy_api.shrimpy_api as shrimpy
-import consts.secrets as secrets
+# import consts.secrets as secrets
+
+def general():
+    for x in range(30):
+        s = 'Sleeping' + '.' * (x % 4) + f'\tRetrying in {30 - x} seconds.'
+        print (s, end='\r')
+        time.sleep(1)
 
 # Load settings
 with open('crypto/crypto_settings.json', 'r', encoding='utf8') as f:
@@ -25,11 +32,11 @@ def test_shrimpy_mock():
     # response = shrimpy.fetch_market_data()
     # df = pd.DataFrame.from_dict(response.json(), orient='columns')
 
-    # shrimpy.write_mock_candles(settings['supported_tokens'])
-    # data = shrimpy.fetch_mock_candles('BTC')
-    # df = pd.DataFrame.from_dict(data, orient='columns')
+    shrimpy.write_mock_candles(settings['supported_tokens'])
+    data = shrimpy.fetch_mock_candles('BTC')
+    df = pd.DataFrame.from_dict(data, orient='columns')
     print(df)
 
-
-test_shrimpy()
-# test_shrimpy_mock()
+# general()
+# test_shrimpy()
+test_shrimpy_mock()

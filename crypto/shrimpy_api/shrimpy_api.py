@@ -1,7 +1,10 @@
+from colorama import Fore
+import time
+from datetime import datetime, timedelta
+import json
 import pandas as pd
 import requests
 import shrimpy
-import json
 
 default_exchange = 'coinbasepro'  # TODO: Make setting
 mock_directory = 'crypto/data/mock/'
@@ -58,9 +61,10 @@ def fetch_candles(symbol, exchange=default_exchange, interval='1D', startTime='2
 
 # MOCK FUNCTIONS (for testing purposes)
 
+
 def write_to_mock_data():  # .json
-    # Note that JSON will use ' instead of " which python json doesn't like
     with open(f'{mock_directory}mock_market_data.json', 'w', encoding='utf8') as f:
+        # Note that JSON will use ' instead of " which python json doesn't like
         f.write(str(fetch_market_data().json()).replace('\'', '\"'))
 
 
@@ -70,12 +74,31 @@ def fetch_mock_market_data():
 
 
 def write_mock_candles(symbols):
-    symbols = symbols[:5]
+    # symbols = symbols[:5] # Limiter
     mock_candles = dict().fromkeys(symbols)
+    candleStartTime = (datetime.now() - timedelta(days=7)
+                       ).isoformat().split('.')[0]  # 7 days ago from now
     for i, symbol in enumerate(symbols):
         print(
             f'Fetching candles for {symbol} and calculating mean...\t({i+1} / {len(symbols)})')
-        candle = fetch_candles(symbol=symbol).json()
+        candle = {}
+        while True:
+            candle = fetch_candles(
+                symbol=symbol, startTime=candleStartTime).json()
+
+            # Sleep and retry if candle data contains error
+            if 'error' in candle:
+                print(
+                    Fore.RED + f'Candle data for {symbol} contains an error. This might be because shrimpy\'s rate limit is reached.' + Fore.RESET)
+                print('Sleeping for 30 seconds and retrying...')
+                for x in range(30):
+                    s = 'Sleeping' + '.' * (x % 4) + \
+                        f'\tRetrying in {30 - x} seconds.'
+                    print(s, end='\r')
+                    time.sleep(1)
+            else:
+                break
+
         mock_candles[symbol] = candle
         with open(f'{mock_directory}mock_candles.json', 'w', encoding='utf8') as f:
             f.write(str(mock_candles).replace('\'', '\"'))
