@@ -29,8 +29,10 @@ def fetch_market_data(exchange=default_exchange):
 
 
 # Fetches candles (historical market data) of given symbol (token)
-def fetch_candles(symbol, exchange=default_exchange, interval='1D', startTime='2021-01-26T00:00:00.000Z'):
-    return requests.get(f'https://dev-api.shrimpy.io/v1/exchanges/{exchange}/candles?quoteTradingSymbol=USD&baseTradingSymbol={symbol}&interval={interval}&startTime={startTime}')
+def fetch_candles(symbol, exchange=default_exchange, quote='USD', interval='1D', startTime=''):
+    if startTime == '':
+        startTime = str(datetime.now() - timedelta(days=7)).split('.')[0]
+    return requests.get(f'https://dev-api.shrimpy.io/v1/exchanges/{exchange}/candles?quoteTradingSymbol={quote}&baseTradingSymbol={symbol}&interval={interval}&startTime={startTime}')
     # https://dev-api.shrimpy.io/v1/exchanges/coinbasepro/candles?quoteTradingSymbol=USD&baseTradingSymbol=BTC&interval=1D&startTime=2021-01-26T00:00:00.000Z
 
     """
@@ -88,12 +90,13 @@ def write_mock_candles(symbols):
 
             # Sleep and retry if candle data contains error
             if 'error' in candle:
-                print(
-                    Fore.RED + f'Candle data for {symbol} contains an error. This might be because shrimpy\'s rate limit is reached.' + Fore.RESET)
+                print(Fore.RED
+                      + f'Candle data for {symbol} contains an error. This might be because shrimpy\'s rate limit is reached.'
+                      + Fore.RESET)
                 print('Sleeping for 30 seconds and retrying...')
                 for x in range(30):
-                    s = 'Sleeping' + '.' * (x % 4) + \
-                        f'\tRetrying in {30 - x} seconds.'
+                    s = 'Sleeping' + '.' * (x % 4) \
+                        + f'\tRetrying in {30 - x} seconds.'
                     print(s, end='\r')
                     time.sleep(1)
             else:

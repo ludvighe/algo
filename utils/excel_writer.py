@@ -8,6 +8,7 @@ import pandas as pd
 import math
 import xlsxwriter
 
+
 # Define what column letter to assign based on index of column in df
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
             'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -67,7 +68,7 @@ def df_to_excel(df, file_name, sheet_name='', background_color='#ffffff', font_c
         final_column_size = column_size
         if dynamic_column_size and len(df.columns[i]) > column_size:
             final_column_size = len(df.columns[i])
-            
+
         writer.sheets[sheet_name].set_column(
             f'{letter}:{letter}', final_column_size, string_format
         )
